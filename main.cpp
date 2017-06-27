@@ -3,7 +3,7 @@
 
 
 int main(int argc, char const *argv[]) {
-	
+	/*
   	double u1, u2, m1, m2, a1, a2, e1;
   	u1 = 10;
   	u2 = 10;
@@ -21,9 +21,9 @@ int main(int argc, char const *argv[]) {
 	cout<<to_radians(b1)<<endl;
 	cout<<to_radians(b2)<<endl;
 
-	
+	*/
 
-	/*
+	
 	
 
 	sf::RenderWindow *window=new sf::RenderWindow(sf::VideoMode(700, 700), "SFML works!");
@@ -142,7 +142,7 @@ int main(int argc, char const *argv[]) {
 	}
 	
 	
-	*/	
+		
 	
   	return 0;
 }
