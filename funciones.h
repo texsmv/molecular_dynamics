@@ -10,147 +10,221 @@ using namespace sf;
 double pi = 3.14159265359;
 
 
-
-
-
-
-class Molecula : public CircleShape{
+class ball{
+private:
+    float x;
+    float y;
+    float diametar;
+    sf::RenderWindow* wi;
+    
+    double xSpeed;
+    double ySpeed;
 public:
-  Molecula(double x, double y, double r, double m, RenderWindow* wi){
-    posicion.x = x;
-    posicion.y = y;
-    this->r = r;
-    this->m = m;
-    this->setRadius(r);    
-    this->setOutlineThickness(1);
-    this->setPosition(posicion);
-    this->wi = wi;
+    float m;
+    ball(float x, float y, float diameter, float m,sf::RenderWindow* wi ) {
+        this->x = x;
+        this->y = y;
+        this->m = m;
+        this-> wi = wi;
+        this->diametar = diameter;
+        
+    }
 
-  }
-  Molecula(){}
-  ~Molecula(){}
-  void dibujar(){
-    wi->draw(*this);
-    sf::CircleShape circle;
-    circle.setRadius(1);
-    circle.setOutlineColor(sf::Color::Red);
-    circle.setOutlineThickness(1);
-    circle.setPosition(this->getCenter());
-    wi->draw(circle);
-  }
+    void draw() {
+        
+        //Ellipse2D.Double circle = new Ellipse2D.Double(getX() - getDiametar() / 2, getY() - getDiametar() / 2, getDiametar(), getDiametar());
+        
+        sf::CircleShape circle;
+        circle.setRadius(getDiametar()/2.);
+        circle.setOutlineColor(sf::Color::Red);
+        circle.setOutlineThickness(1);
+        circle.setPosition(getX() - getDiametar() / 2, getY() - getDiametar() / 2);
+        wi->draw(circle);
+    }
 
-  void update_position(){
-    this->setPosition(posicion);
-  }
+    void move() {
+        setX((float) (getX() + getxSpeed()));
 
-  void set_velocidad(Vector2f vel){
-    velocidad = vel;
-  }
+        if (getX() - getDiametar() / 2 < 0) {
+            setX(getDiametar() / 2);
+            setxSpeed(-getxSpeed());
+        } else if (getX() + getDiametar() / 2 > 390) {
+            setxSpeed(-getxSpeed());
+        }
 
-  void update(){    
-    update_position();
-    posicion = getPosition();
-  }
+        setY((float) (getY() + getySpeed()));
 
-  void mover(){
-    posicion += velocidad;
-  }
+        if (getY() - getDiametar() / 2 < 0) {
+            setySpeed(-getySpeed());
+        } else if (getY() + getDiametar() / 2 > 360) {
+            setY(360 - getDiametar() / 2);
+            setySpeed(-getySpeed());
+        }
+    }
 
-  Vector2f getCenter(){
-    return Vector2f(posicion.x + r, posicion.y + r);
-  }
+    /**
+     * @return the xSpeed
+     */
+    double getxSpeed() {
+        return xSpeed;
+    }
 
-  double x, y, r, m;
-  Vector2f velocidad;
-  Vector2f posicion;
-  sf::RenderWindow* wi;
+    /**
+     * @param xSpeed the xSpeed to set
+     */
+    void setxSpeed(double xSpeed) {
+        this->xSpeed = xSpeed;
+    }
+
+    /**
+     * @return the ySpeed
+     */
+    double getySpeed() {
+        return ySpeed;
+    }
+
+    /**
+     * @param ySpeed the ySpeed to set
+     */
+    void setySpeed(double ySpeed) {
+        this->ySpeed = ySpeed;
+    }
+
+    /**
+     * @return the x
+     */
+    float getX() {
+        return x;
+    }
+
+    /**
+     * @param x the x to set
+     */
+    void setX(float x) {
+        this->x = x;
+    }
+
+    /**
+     * @return the y
+     */
+    float getY() {
+        return y;
+    }
+
+    /**
+     * @param y the y to set
+     */
+    void setY(float y) {
+        this->y = y;
+    }
+
+    /**
+     * @return the diametar
+     */
+    float getDiametar() {
+        return diametar;
+    }
+
+    /**
+     * @param diameter
+     */
+    void setDiametar(float diameter) {
+        this->diametar = diameter;
+    }
 };
 
+void collision2Ds(double m1, double m2, double R,
+                 double x1, double y1, double x2, double y2,
+                 double& vx1, double& vy1, double& vx2, double& vy2)     {
+
+       double  m21,dvx2,a,x21,y21,vx21,vy21,fy21,sign,vx_cm,vy_cm;
 
 
+       m21=m2/m1;
+       x21=x2-x1;
+       y21=y2-y1;
+       vx21=vx2-vx1;
+       vy21=vy2-vy1;
+
+       vx_cm = (m1*vx1+m2*vx2)/(m1+m2) ;
+       vy_cm = (m1*vy1+m2*vy2)/(m1+m2) ;
 
 
+//     *** return old velocities if balls are not approaching ***
+       if ( (vx21*x21 + vy21*y21) >= 0) return;
 
 
-double to_degrees(double x){
-  return x * pi / 180;
+//     *** I have inserted the following statements to avoid a zero divide;
+//         (for single precision calculations,
+//          1.0E-12 should be replaced by a larger value). **************
+
+       fy21=1.0E-12*fabs(y21);
+       if ( fabs(x21)<fy21 ) {
+                   if (x21<0) { sign=-1; } else { sign=1;}
+                   x21=fy21*sign;
+        }
+
+//     ***  update velocities ***
+       a=y21/x21;
+       dvx2= -2*(vx21 +a*vy21)/((1+a*a)*(1+m21)) ;
+       vx2=vx2+dvx2;
+       vy2=vy2+a*dvx2;
+       vx1=vx1-m21*dvx2;
+       vy1=vy1-a*m21*dvx2;
+
+//     ***  velocity correction for inelastic collisions ***
+       vx1=(vx1-vx_cm)*R + vx_cm;
+       vy1=(vy1-vy_cm)*R + vy_cm;
+       vx2=(vx2-vx_cm)*R + vx_cm;
+       vy2=(vy2-vy_cm)*R + vy_cm;
+
+       return;
 }
 
-double to_radians(double x){
-  return x * 180 / pi;
-}
+void checkCollision(ball& b1, ball& b2, double& deltaX, double& deltaY, double& distance) {
 
-void impacto(double u1, double u2, double a1, double a2, double m1, double m2, double e, double& v1, double& v2, double& b1, double& b2){
-  
-  double F1 = e * (u1 * cos(a1) - u2 * cos(a2));    
-  double F2 = m1 * u1 * cos(a1) + m2 * u2 *cos(a2);  
-  double h1 = u1 * sin(a1);  
-  double h2 = u2 * sin(a2);
-  double V1 = F1 *m1;
-  V1 = V1 + F2;
-  V1 = V1 / (m1 + m2);
-  b2 = atan(h2 / V1);  
-  v2 = h2 / sin(b2);
-  double V2 = F1 * -m2;
-  V2 = V2 + F2;
-  V2 = V2 / (m1 + m2);
-  b1 = atan(h1 / V2);  
-  v1 = h1 / sin(b1);
-  
+      deltaX = fabs(b1.getX() - b2.getX());
+      deltaY = fabs(b1.getY() - b2.getY());
+      distance = deltaX * deltaX + deltaY * deltaY;
+      
+      if (distance < (b1.getDiametar() / 2 + b2.getDiametar() / 2) * (b1.getDiametar() / 2 + b2.getDiametar() / 2)) {
+          /*
+          double newxSpeed1 = (b1.getxSpeed() * (4 - 7) + (2 * 7 * b2.getxSpeed())) / 11;
 
+          double newxSpeed2 = (b2.getxSpeed() * (7 - 4) + (2 * 4 * b1.getxSpeed())) / 11;
 
-}
+          double newySpeed1 = (b1.getySpeed() * (4 - 7) + (2 * 7 * b2.getySpeed())) / 11;
 
+          double newySpeed2 = (b2.getySpeed() * (7 - 4) + (2 * 4 * b1.getySpeed())) / 11;
 
-double angle_vector(Vector2f u, Vector2f v){
-  double val = (u.x * v.x + u.y * v.y) / (sqrt(pow(u.x,2) + pow(u.y, 2)) * sqrt(pow(v.x,2) + pow(v.y, 2)));  
-  val = acos(val);
-  //val = to_radians(val);
-  return val;
-}
+          b2.setxSpeed(newxSpeed2);
+          b2.setySpeed(newySpeed2);
+          b1.setxSpeed(newxSpeed1);
+          
 
+          b1.setySpeed(newySpeed1);
+        */
+        double vx1, vy1, vx2, vy2;
+        vx1= b1.getxSpeed();
+        vy1= b1.getySpeed();
+        vx2= b2.getxSpeed();
+        vy2= b2.getySpeed();
+        collision2Ds(b1.m, b2.m, 1.0, b1.getX() , b1.getY(),b2.getX(), b2.getY(), vx1, vy1, vx2, vy2);
+        b1.setxSpeed(vx1);
+        b1.setySpeed(vy1);
+        b2.setxSpeed(vx2);
+        b2.setySpeed(vy2);
 
-
-
-
-double angle_pairs(pair<double, double> u, pair<double, double> v){
-  double val = (u.first * v.first + u.second * v.second) / (sqrt(pow(u.first,2) + pow(u.second, 2)) * sqrt(pow(v.first,2) + pow(v.second, 2)));  
-  val = acos(val);  
-  //val = to_radians(val);
-  return val;
-}
-
-double angle_x_axis(Vector2f v){
-  Vector2f u(1, 0);
-  double val = (u.x * v.x + u.y * v.y) / (sqrt(pow(u.x,2) + pow(u.y, 2)) * sqrt(pow(v.x,2) + pow(v.y, 2)));  
-  val = acos(val);  
-  if(v.y < 0){
-    val = to_degrees(180) + val;
+      }
   }
-  return val;
-}
 
 
 
-double distance_vector(Vector2f u, Vector2f v){
-  return sqrt(pow((u.x - v.x),2 ) + pow((u.y - v.y),2 ));
-}
 
 
-double modulo_vector(Vector2f v){
-  return sqrt(pow(v.x, 2) + pow(v.y, 2));
-}
 
 
-double complemento(double x){
-  x = to_radians(x);
-  x = 360 - x;
-  x = to_degrees(x);
-  return x;
-}
 
-double min(double x,double y){
-  if (x > y)
-    return y;
-  return x;
-}
+
+
+
