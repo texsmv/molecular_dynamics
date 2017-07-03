@@ -1,4 +1,5 @@
-#include "funciones.h"
+#include <iostream>
+#include "controlador.h"
 
 
 
@@ -7,38 +8,20 @@
 
 int main(int argc, char const *argv[]) {
 
-
-
-	sf::RenderWindow *window=new sf::RenderWindow(sf::VideoMode(700, 700), "SFML works!");
-
-
-
-
-	sf::Event ev;
 	
+	srand(time(NULL));
+	cout<<asin(sin(0.5 * 180 / pi)) <<endl;
+	cout<<sin(asin(0.5)) <<endl;
+	float alto , ancho;
+	alto = 500;
+	ancho = 700;
+	sf::RenderWindow *window = new RenderWindow(sf::VideoMode(ancho, alto), "Proyecto Moleculas");
 
-	ball b1(50, 80, 30, 3,window);	
-    bool going = true;
+	Controlador controlador(alto, ancho,  window);
+	controlador.set_numero_moleculas(60);
+	controlador.crear_moleculas();
 
-    
-    ball b2(50, 80, 70, 10,window);
-    double deltaX;
-    double deltaY;
-    double distance;
-
-    
-    b1.setX(50);
-    b1.setY(80);
-    b1.setxSpeed(0.1);
-    b1.setySpeed(0.1);
-
-    
-    b2.setX(150);
-    b2.setY(80);
-    b2.setxSpeed(0.04);
-    b2.setySpeed(0.02);
-
-
+	int cont = 0;
 
 	while (window->isOpen())
 	{
@@ -50,16 +33,13 @@ int main(int argc, char const *argv[]) {
 	        if (event.type == sf::Event::Closed || ( (event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)) )
 	            window->close();
 	    }
-	    
-	    b1.move();
-        b2.move();
+	   
 
-        checkCollision(b1, b2, deltaX, deltaY, distance);
-
-	    window->clear();
-		b1.draw();
-        b2.draw();	    
+	    window->clear();		
+	    controlador.update();
         window->display();
+        
+        cont++;
 
 	}
 
