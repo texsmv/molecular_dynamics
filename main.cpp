@@ -10,18 +10,20 @@ int main(int argc, char const *argv[]) {
 
 	
 	srand(time(NULL));
-	cout<<asin(sin(0.5 * 180 / pi)) <<endl;
-	cout<<sin(asin(0.5)) <<endl;
-	float alto , ancho;
+
+	float alto , ancho, tiempoRefresco;
 	alto = 500;
 	ancho = 700;
+	tiempoRefresco = 0.005;
+
 	sf::RenderWindow *window = new RenderWindow(sf::VideoMode(ancho, alto), "Proyecto Moleculas");
 
-	Controlador controlador(alto, ancho,  window);
-	controlador.set_numero_moleculas(60);
+	Controlador controlador(alto, ancho,  tiempoRefresco, window);
+	controlador.set_numero_moleculas(1);
 	controlador.crear_moleculas();
 
-	int cont = 0;
+	Clock clockM;
+
 
 	while (window->isOpen())
 	{
@@ -35,16 +37,20 @@ int main(int argc, char const *argv[]) {
 	    }
 	   
 
-	    window->clear();		
-	    controlador.update();
-        window->display();
-        
-        cont++;
+	    Time te = clockM.getElapsedTime();  
+
+        if(te.asSeconds() > tiempoRefresco ){
+        	window->clear();	
+
+	    	controlador.update();
+
+	   
+	    	clockM.restart();
+        	window->display();
+		}
+
 
 	}
-
-
-	
 
   	return 0;
 

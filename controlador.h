@@ -19,25 +19,26 @@ class Controlador
 {
 public:
 	Controlador(){}
-	Controlador(float alto, float ancho, RenderWindow* wi){
+	Controlador(float alto, float ancho, float te,RenderWindow* wi){
 		this->ancho = ancho;
-		this->alto = alto;		
+		this->alto = alto;	
+		this->tiempoEmpleado = te;	
 		window = wi;
 	}
 	~Controlador(){}
-	Clock reloj;
+
 	bool b_update = true;
+	float tiempoEmpleado;
 	float alto;
 	float ancho;
 	float e = 40.3;
 	float o = 3.33;
-	float fps = 20;
 	float a_gravedad = 1000;
 	RenderWindow* window;
 	Event* evento;	
 	vector<molecula*> moleculas;
 	
-	int n;
+	int n; //Numero de moleculas
 
 	void set_numero_moleculas(int n){
 		this-> n = n;
@@ -48,7 +49,7 @@ public:
 	}
 
 	void crear_moleculas(){
-		for(int i = 0; i < n; i++){
+		for(int i = 0; i < this->n; i++){
 			molecula* mol = new molecula(numero_random(0, ancho), numero_random(0, alto), 5, 1, window);
 			//mol->set_velocidad_x(numero_random(-10, 10));
 			//mol->set_velocidad_y(numero_random(-10, 10));
@@ -73,11 +74,12 @@ public:
 	        }
 	        if (mol->get_y() - mol->get_radio() < 0) {
 	        	mol->set_y(mol->get_radio());
-	        	mol->set_velocidad_y(-mol->get_velocidad_y());
+	        	mol->set_velocidad_y(-mol->get_velocidad_y() );
 	        }
 	        else if(mol->get_y() + mol->get_radio() > alto){
+	        	//Choque Piso
 	        	mol->set_y(alto - mol->get_radio());
-	        	mol->set_velocidad_y(- mol->get_velocidad_y());
+	        	mol->set_velocidad_y(- mol->get_velocidad_y() * 0.8 );
 	        }
 		}
 
@@ -109,14 +111,14 @@ public:
 			mol->set_aceleracion_y(mol->get_fuerza_y() / mol->get_masa());
 			mol->set_velocidad_x(mol->get_velocidad_x() + mol->get_aceleracion_x() * tiempo_frame());
 			mol->set_velocidad_y(mol->get_velocidad_y() + mol->get_aceleracion_y() * tiempo_frame());
-			cout<<mol->get_velocidad_y()<<" "<<mol->get_aceleracion_y()<<" "<<mol->get_fuerza_y()<<endl;
+			//cout<<mol->get_velocidad_y()<<endl; //<<" "<<mol->get_aceleracion_y()<<" "<<mol->get_fuerza_y()<<endl;
 			
 		}
 	}
 
 	void update(){
+
 		if (b_update){
-			reloj.restart();
 			update_fuerza_moleculas();
 			//leonard_jones_moleculas();
 			update_velocidad_moleculas();
@@ -295,8 +297,7 @@ public:
 	}
 
 	float tiempo_frame(){
-
-		return reloj.getElapsedTime().asSeconds() * fps;
+		return tiempoEmpleado;
 	}
 
 };
