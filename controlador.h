@@ -54,7 +54,7 @@ public:
 			//mol->set_velocidad_x(numero_random(-10, 10));
 			//mol->set_velocidad_y(numero_random(-10, 10));
 			// inicializar usando distribucion aleatoria uniforme (Maxwel)
-			mol->set_velocidad_x(0);
+			mol->set_velocidad_x(5);
 			mol->set_velocidad_y(0);
 		
 			moleculas.push_back(mol);
