@@ -19,7 +19,7 @@ int main(int argc, char const *argv[]) {
 	sf::RenderWindow *window = new RenderWindow(sf::VideoMode(ancho, alto), "Proyecto Moleculas");
 
 	Controlador controlador(alto, ancho,  tiempoRefresco, window);
-	controlador.set_numero_moleculas(2);
+	controlador.set_numero_moleculas(1000);
 	controlador.crear_moleculas();
 
 	Clock clockM;

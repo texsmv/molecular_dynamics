@@ -33,7 +33,7 @@ public:
 	float ancho;
 	float e = 40.3;
 	float o = 3.33;
-	float a_gravedad = 1000;
+	float a_gravedad = 0.5;
 	RenderWindow* window;
 	Event* evento;	
 	vector<molecula*> moleculas;
@@ -50,12 +50,11 @@ public:
 
 	void crear_moleculas(){
 		for(int i = 0; i < this->n; i++){
-			molecula* mol = new molecula(numero_random(0, ancho), numero_random(0, alto), 5, 1, window);
-			//mol->set_velocidad_x(numero_random(-10, 10));
-			//mol->set_velocidad_y(numero_random(-10, 10));
-			// inicializar usando distribucion aleatoria uniforme (Maxwel)
-			mol->set_velocidad_x(5);
-			mol->set_velocidad_y(0);
+			molecula* mol = new molecula(numero_random(0, ancho), numero_random(0, alto), 2 , 0.0001, window);
+			mol->set_velocidad_x(numero_random(-150, 150));
+			mol->set_velocidad_y(numero_random(-150, 150));
+			//mol->set_velocidad_x(100);
+			//mol->set_velocidad_y(0);
 		
 			moleculas.push_back(mol);
 		}
@@ -66,20 +65,20 @@ public:
 			
 			if (mol->get_x() - mol->get_radio() < 0){
 	            mol->set_x(mol->get_radio());
-	            mol->set_velocidad_x(-mol->get_velocidad_x());
+	            mol->set_velocidad_x(-mol->get_velocidad_x() * 1);
 	        }
 	        else if(mol->get_x() + mol->get_radio() > ancho){
 				mol->set_x(ancho - mol->get_radio());
-	            mol->set_velocidad_x(-mol->get_velocidad_x());	
+	            mol->set_velocidad_x(-mol->get_velocidad_x() * 1);	
 	        }
 	        if (mol->get_y() - mol->get_radio() < 0) {
 	        	mol->set_y(mol->get_radio());
-	        	mol->set_velocidad_y(-mol->get_velocidad_y() );
+	        	mol->set_velocidad_y(-mol->get_velocidad_y() * 1 );
 	        }
 	        else if(mol->get_y() + mol->get_radio() > alto){
 	        	//Choque Piso
 	        	mol->set_y(alto - mol->get_radio());
-	        	mol->set_velocidad_y(- mol->get_velocidad_y() * 0.8 );
+	        	mol->set_velocidad_y(- mol->get_velocidad_y() * 1  );
 	        }
 		}
 
@@ -106,6 +105,9 @@ public:
 	}
 
 	void update_velocidad_moleculas(){
+
+		float utotal = 0;
+
 		for(auto mol : moleculas){
 			mol->set_aceleracion_x(mol->get_fuerza_x() / mol->get_masa());
 			mol->set_aceleracion_y(mol->get_fuerza_y() / mol->get_masa());
@@ -113,18 +115,27 @@ public:
 			mol->set_velocidad_y(mol->get_velocidad_y() + mol->get_aceleracion_y() * tiempo_frame());
 			//cout<<mol->get_velocidad_y()<<endl; //<<" "<<mol->get_aceleracion_y()<<" "<<mol->get_fuerza_y()<<endl;
 			
+			float vxx = mol->get_velocidad_x();
+			float vyy = mol->get_velocidad_y();
+			float u = 0.5 * mol->get_masa()*(vxx*vxx + vyy * vyy); 
+			utotal+=u;
+
+			//cout << "u " << u << " " << vxx << " " << vyy  << "m" << mol->get_masa() << endl;
 		}
+
+		cout << "UTOTAL: "<<utotal << endl;
+
 	}
 
 	void update(){
 
 		if (b_update){
-			update_fuerza_moleculas();
+			colisiones_moleculas();
+			colisiones_caja();
+			//update_fuerza_moleculas(); //Gravedad
 			//leonard_jones_moleculas();
 			update_velocidad_moleculas();
 			mover_moleculas();
-			colisiones_caja();
-			colisiones_moleculas();
 			dibujar_moleculas();
 			
 		}
@@ -135,10 +146,12 @@ public:
 
 		for(int i = 0; i < n; i++){
 			for(int j = 0; j < n; j++){
-				if(verificar_colision_moleculas(moleculas[i], moleculas[j]) && !b_colision[i][j] && i!= j){
-					b_colision[i][j] = true;
-					b_colision[j][i] = true;
-					colision_moleculas(moleculas[i], moleculas[j]);
+				if(i!= j)
+					if(!b_colision[i][j])
+						if(verificar_colision_moleculas(moleculas[i], moleculas[j])){
+						b_colision[i][j] = true;
+						b_colision[j][i] = true;
+						colision_moleculas(moleculas[i], moleculas[j]);
 				}
 			}
 		}
@@ -233,7 +246,8 @@ public:
         vx2 = mol2->get_velocidad_x();
         vy2 = mol2->get_velocidad_y();
         m2  = mol2->get_masa();
-        R = 0.8;
+        
+        R = 1;
 
         double  m21,dvx2,a,x21,y21,vx21,vy21,fy21,sign,vx_cm,vy_cm;
 
@@ -284,7 +298,7 @@ public:
 	}
 
 	bool verificar_colision_moleculas(molecula* mol1,  molecula* mol2){
-		if (distancia(mol1->get_x(), mol1->get_y(), mol2->get_x(), mol2->get_y()) < mol1->get_radio() + mol2->get_radio()){
+		if (distancia(mol1->get_x(), mol1->get_y(), mol2->get_x(), mol2->get_y()) < mol1->get_radio() + mol2->get_radio() - 0.1){
 			
 			return true;
 		}
